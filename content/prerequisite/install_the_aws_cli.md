@@ -4,10 +4,6 @@ We just created a new IAM user and got some credentials(AWS ACCESS KEY ID and SE
 
 Now, we have to install and configure the aws cli in order to work easily with aws services. 
 
-Before we proceed, we must first install python3.3+. 
-
-- [python installation](https://www.python.org/downloads/)
-- [pip installation](https://pip.pypa.io/en/stable/installation/)
 
 Now, refer to the official aws cli installation documentation [here](https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html)
 
