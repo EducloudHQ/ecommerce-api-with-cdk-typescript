@@ -1,74 +1,11 @@
-import * as cdk from 'aws-cdk-lib';
-import { Construct } from 'constructs';
-import * as dynamodb from 'aws-cdk-lib/aws-dynamodb'
-import * as lambda from 'aws-cdk-lib/aws-lambda';
-import * as sqs from 'aws-cdk-lib/aws-sqs'
-import * as apigw from 'aws-cdk-lib/aws-apigateway'
-import path = require('path');
+# API Endpoint Routes
 
-import { RemovalPolicy,  } from 'aws-cdk-lib';
-export class EcomApiCdkStack extends cdk.Stack {
-  constructor(scope: Construct, id: string, props?: cdk.StackProps) {
-    super(scope, id, props);
+Here, we'll define `functions`, `api endpoint`, `routes`, the lambda handlers associated to this routes and the` http method` that is used to trigger each of those lambda function handler.
 
+In `ecom-api-stack.ts`, add the following code in the `constructor`.
 
-
-  const queue = new sqs.Queue(this, 'mainQueue',{
-    visibilityTimeout: cdk.Duration.seconds(300),
-    queueName: 'mainQueue.fifo',
-    fifo: true,
-  })
-
-  const table = new dynamodb.Table(this, 'EcommerceAppTable', {
-    tableName: 'ecom-api-cdk',
-    partitionKey: { name: 'pk', type: dynamodb.AttributeType.STRING,},
-    sortKey: {type: dynamodb.AttributeType.STRING, name:'sk' },
-    removalPolicy: RemovalPolicy.DESTROY,
-    stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
-  })
-  const globalSecondaryIndexProps: dynamodb.GlobalSecondaryIndexProps = {
-    indexName: 'GSI1',
-    partitionKey: {
-      name: 'GSI1PK',
-      type: dynamodb.AttributeType.STRING,
-    },
-    sortKey: {
-      name: 'GSI1SK',
-      type: dynamodb.AttributeType.STRING,
-    },
-  };
-  const queueConsumer = new lambda.Function(this, 'consumerFunction', {
-    handler: 'queueConsumer.lambdaHandler',
-    runtime: lambda.Runtime.NODEJS_14_X,
-    code: lambda.Code.fromAsset('src'),
-    environment: {
-      'TABLE_NAME': table.tableName,
-      'QUEUE_URL': queue.queueName
-    },
-  });
-
-  const streamConsumer = new lambda.Function(this, 'streamConsumer', {
-    handler: 'streamConsumer.lambdaHandler',
-    runtime: lambda.Runtime.NODEJS_14_X,
-    code: lambda.Code.fromAsset('src'),
-    environment: {
-      'TABLE_NAME': table.tableName,
-      'QUEUE_URL': queue.queueName
-    },
-    role: queueConsumer.role,
-  });
-
-  table.addGlobalSecondaryIndex(globalSecondaryIndexProps);
-  table.grantStreamRead(streamConsumer);
-  table.grantReadWriteData(streamConsumer);
-  queue.grantSendMessages(streamConsumer);
-  queue.grantConsumeMessages(queueConsumer);
-  table.grantWriteData(queueConsumer)
-
-  
-  const api = new apigw.RestApi(this, 'ecom-api')
-
-  const loadProducts = new lambda.Function(this, 'loadProducts', {
+```ts
+   const loadProducts = new lambda.Function(this, 'loadProducts', {
     runtime: lambda.Runtime.NODEJS_14_X,
     handler: 'loadProducts.lambdaHandler',
     code: lambda.Code.fromAsset('src'),
@@ -133,8 +70,8 @@ export class EcomApiCdkStack extends cdk.Stack {
     }
   });
 
-  table.grantReadData(listCartItems)
   table.grantReadData(listOrders)
+  table.grantReadData(listCartItems)
   table.grantReadData(getProduct)
   table.grantReadData(listproducts)
   table.grantReadWriteData(placeOrder)
@@ -182,5 +119,34 @@ export class EcomApiCdkStack extends cdk.Stack {
     new apigw.LambdaIntegration(listOrders)
   )
 
-  }
-}
+  ```
+`loadProduct`: Load products to the database.
+
+`listProducts`: List all the products in the database.
+
+`getProducts`: Gets a product by productId.
+
+`addToCart`: Add Items to cart.
+
+`placeOrder`: Allows user to place and order on cart items
+
+`listOrders`: List all orders placed by user.
+
+`listCartItems`: List all items in user cart.
+
+**Function props**
+
+The `handler` property of the function object specifies the file and the function name of the Lambda function. 
+
+
+The `environment` property of the function object specifies the `environment variables` that the Lambda function will have access to. In this case, the environment property specifies the `tableName` environment variable.
+
+The `timeout` property of the function object specifies the maximum amount of time that the Lambda function is allowed to run. In this case, the timeout property is set to 60 seconds.
+
+**DynamoDB Table Permissions**
+
+`grantReadData`: Grant read data access to a lambda function.
+
+`grantReadWriteData`: Grant read, write data permissions to a lambda function resource.
+
+`grantWriteData`: Grant write data permision to a lambda function.
