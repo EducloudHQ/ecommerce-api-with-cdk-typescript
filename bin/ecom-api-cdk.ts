@@ -17,5 +17,6 @@ new EcomApiCdkStack(app, 'EcomApiCdkStack', {
    * want to deploy the stack to. */
   // env: { account: '123456789012', region: 'us-east-1' },
 
+  env: { account: '132260253285', region: 'eu-west-2' },
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
