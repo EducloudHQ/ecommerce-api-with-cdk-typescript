@@ -1,7 +1,7 @@
 [
   {
     "category": "fruit",
-    "pk": "PRODUCT",
+    "PK": "PRODUCT",
     "createdDate": "2017-04-17T01:14:03 -02:00",
     "description": "Culpa non veniam deserunt dolor irure elit cupidatat culpa consequat nulla irure aliqua.",
     "modifiedDate": "2019-03-13T12:18:27 -01:00",
@@ -14,7 +14,7 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 716,
-    "sk": "PRODUCT#4c1fadaa-213a-4ea8-aa32-58c217604e3c",
+    "SK": "PRODUCT#4c1fadaa-213a-4ea8-aa32-58c217604e3c",
     "tags": ["mollit", "ad", "eiusmod", "irure", "tempor"]
   },
   {
@@ -31,8 +31,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 35,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#d2580eff-d105-45a5-9b21-ba61995bc6da",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#d2580eff-d105-45a5-9b21-ba61995bc6da",
     "tags": ["laboris", "dolor", "in", "labore", "duis"]
   },
   {
@@ -41,7 +41,7 @@
     "description": "Reprehenderit aliquip consequat quis excepteur et et esse exercitation adipisicing dolore nulla consequat.",
     "modifiedDate": "2019-11-25T12:32:49 -01:00",
     "name": "fresh prunes",
-    "pk": "PRODUCT",
+    "PK": "PRODUCT",
     "package": {
       "height": 736,
       "length": 567,
@@ -50,7 +50,7 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 2,
-    "sk": "PRODUCT#a6dd7187-40b6-4cb5-b73c-aecd655c6d9a",
+    "SK": "PRODUCT#a6dd7187-40b6-4cb5-b73c-aecd655c6d9a",
     "tags": ["nisi", "quis", "sint", "adipisicing", "pariatur"]
   },
   {
@@ -67,8 +67,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 97,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#c0fbcc6b-7a70-41ac-aac4-f8fd237dc62e",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#c0fbcc6b-7a70-41ac-aac4-f8fd237dc62e",
     "tags": ["dolor", "officia", "fugiat", "officia", "voluptate"]
   },
   {
@@ -85,8 +85,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 144,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#cb40c919-033a-47d6-8d00-1d73e2df20fe",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#cb40c919-033a-47d6-8d00-1d73e2df20fe",
     "tags": ["nostrud", "elit", "Lorem", "occaecat", "duis"]
   },
   {
@@ -102,9 +102,9 @@
       "width": 436
     },
     "pictures": ["http://placehold.it/32x32"],
-    "pk": "PRODUCT",
+    "PK": "PRODUCT",
     "price": 51,
-    "sk": "PRODUCT#12929eb9-3eb7-4217-99e4-1a39c39217b6",
+    "SK": "PRODUCT#12929eb9-3eb7-4217-99e4-1a39c39217b6",
     "tags": ["ad", "ipsum", "est", "eiusmod", "duis"]
   },
   {
@@ -121,8 +121,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 894,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#9fd9ef32-493f-4188-99f5-3aa809aa4fa9",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#9fd9ef32-493f-4188-99f5-3aa809aa4fa9",
     "tags": ["fugiat", "velit", "non", "magna", "laboris"]
   },
   {
@@ -138,9 +138,9 @@
       "width": 964
     },
     "pictures": ["http://placehold.it/32x32"],
-    "pk": "PRODUCT",
+    "PK": "PRODUCT",
     "price": 452,
-    "sk": "PRODUCT#20db6331-1084-48ff-8c4f-c1d98a6a1aa4",
+    "SK": "PRODUCT#20db6331-1084-48ff-8c4f-c1d98a6a1aa4",
     "tags": ["laborum", "in", "aliquip", "sint", "quis"]
   },
   {
@@ -157,8 +157,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 322,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#8c843a54-27d7-477c-81b3-c21db12ed1c9",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#8c843a54-27d7-477c-81b3-c21db12ed1c9",
     "tags": ["officia", "proident", "officia", "commodo", "nisi"]
   },
   {
@@ -174,9 +174,9 @@
       "width": 821
     },
     "pictures": ["http://placehold.it/32x32"],
-    "pk": "PRODUCT",
+    "PK": "PRODUCT",
     "price": 163,
-    "sk": "PRODUCT#8d2024c0-6c05-4691-a0ff-dd52959bd1df",
+    "SK": "PRODUCT#8d2024c0-6c05-4691-a0ff-dd52959bd1df",
     "tags": ["excepteur", "ipsum", "nulla", "nisi", "velit"]
   },
   {
@@ -185,7 +185,7 @@
     "description": "Ullamco commodo cupidatat reprehenderit eu sunt.",
     "modifiedDate": "2019-03-11T06:10:38 -01:00",
     "name": "fresh croissants",
-    "pk": "PRODUCT",
+    "PK": "PRODUCT",
     "package": {
       "height": 122,
       "length": 23,
@@ -194,7 +194,7 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 634,
-    "sk": "PRODUCT#867ecb2b-ef08-446e-8360-b63f60969e3d",
+    "SK": "PRODUCT#867ecb2b-ef08-446e-8360-b63f60969e3d",
     "tags": ["labore", "dolor", "aliquip", "nulla", "aute"]
   },
   {
@@ -211,8 +211,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 77,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#684011fc-ecfd-4557-a6df-9fc977365826",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#684011fc-ecfd-4557-a6df-9fc977365826",
     "tags": ["voluptate", "laborum", "exercitation", "anim", "anim"]
   },
   {
@@ -229,8 +229,8 @@
     },
     "pictures": ["http://placehold.it/32x32"],
     "price": 805,
-    "pk": "PRODUCT",
-    "sk": "PRODUCT#b027697d-a070-4c8f-8b9a-b8c80b2eb0ba",
+    "PK": "PRODUCT",
+    "SK": "PRODUCT#b027697d-a070-4c8f-8b9a-b8c80b2eb0ba",
     "tags": ["nostrud", "in", "duis", "laboris", "minim"]
   }
 ]

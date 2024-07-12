@@ -1,10 +1,10 @@
 #!/usr/bin/env node
-import 'source-map-support/register';
-import * as cdk from 'aws-cdk-lib';
-import { EcomApiCdkStack } from '../lib/ecom-api-cdk-stack';
+import "source-map-support/register";
+import * as cdk from "aws-cdk-lib";
+import { EcomApiCdkStack } from "../lib/ecom-api-cdk-stack";
 
 const app = new cdk.App();
-new EcomApiCdkStack(app, 'EcomApiCdkStack', {
+new EcomApiCdkStack(app, "EcommerceRestAPICDKTypescript", {
   /* If you don't specify 'env', this stack will be environment-agnostic.
    * Account/Region-dependent features and context lookups will not work,
    * but a single synthesized template can be deployed anywhere. */
@@ -17,6 +17,6 @@ new EcomApiCdkStack(app, 'EcomApiCdkStack', {
    * want to deploy the stack to. */
   // env: { account: '123456789012', region: 'us-east-1' },
 
-  env: { account: '132260253285', region: 'eu-west-2' },
+  env: { account: "132260253285", region: "us-east-2" },
   /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
 });
