@@ -21,10 +21,9 @@ export class EcomApiCdkStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const queue = new aws_sqs.Queue(this, "mainQueue", {
+    const queue = new aws_sqs.Queue(this, "ecommerce-api-queue", {
       visibilityTimeout: Duration.seconds(300),
-      queueName: "mainQueue.fifo",
-      fifo: true,
+      queueName: "ecommerce-api-queue",
     });
 
     const productsTable = new aws_dynamodb.Table(this, "EcommerceAppTable", {
@@ -32,7 +31,7 @@ export class EcomApiCdkStack extends Stack {
       partitionKey: { name: "PK", type: aws_dynamodb.AttributeType.STRING },
       sortKey: { type: aws_dynamodb.AttributeType.STRING, name: "SK" },
       removalPolicy: RemovalPolicy.DESTROY,
-      stream: aws_dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
+      stream: aws_dynamodb.StreamViewType.NEW_IMAGE,
     });
 
     const globalSecondaryIndexProps: aws_dynamodb.GlobalSecondaryIndexProps = {
@@ -107,6 +106,7 @@ export class EcomApiCdkStack extends Stack {
       new DynamoEventSource(productsTable, {
         startingPosition: aws_lambda.StartingPosition.LATEST,
         reportBatchItemFailures: true,
+        batchSize: 5,
       })
     );
 
@@ -117,7 +117,26 @@ export class EcomApiCdkStack extends Stack {
     queue.grantConsumeMessages(queueConsumer);
     productsTable.grantWriteData(queueConsumer);
 
-    const api = new aws_apigateway.RestApi(this, "ecom-api");
+    const api = new aws_apigateway.RestApi(this, "ecom-api", {
+      restApiName: "ecommerce_api_cdk_rest",
+    });
+    const apiKey = api.addApiKey("ecommerce_api_key", {
+      apiKeyName: "ecommerce_api_key",
+    });
+    // Create a usage plan and associate the API Key
+    const plan = api.addUsagePlan("EcommerUsagePlan", {
+      name: "Easy",
+      throttle: {
+        rateLimit: 10,
+        burstLimit: 2,
+      },
+    });
+
+    plan.addApiKey(apiKey);
+
+    plan.addApiStage({
+      stage: api.deploymentStage,
+    });
 
     const loadProducts = new aws_lambda_nodejs.NodejsFunction(
       this,
@@ -190,35 +209,57 @@ export class EcomApiCdkStack extends Stack {
     const product = products.addResource("{id}");
     products.addMethod(
       "POST",
-      new aws_apigateway.LambdaIntegration(loadProducts)
+
+      new aws_apigateway.LambdaIntegration(loadProducts),
+      {
+        apiKeyRequired: true,
+      }
     );
     products.addMethod(
       "GET",
-      new aws_apigateway.LambdaIntegration(listproducts)
+      new aws_apigateway.LambdaIntegration(listproducts),
+      {
+        apiKeyRequired: true,
+      }
     );
 
-    product.addMethod("GET", new aws_apigateway.LambdaIntegration(getProduct));
+    product.addMethod("GET", new aws_apigateway.LambdaIntegration(getProduct), {
+      apiKeyRequired: true,
+    });
 
     const cart = api.root.addResource("cart");
     const userCart = cart.addResource("{id}");
     const cartUserCheckout = userCart.addResource("checkout");
-    userCart.addMethod("POST", new aws_apigateway.LambdaIntegration(addToCart));
+    cart.addMethod("POST", new aws_apigateway.LambdaIntegration(addToCart), {
+      apiKeyRequired: true,
+    });
     userCart.addMethod(
       "GET",
-      new aws_apigateway.LambdaIntegration(listCartItems)
+      new aws_apigateway.LambdaIntegration(listCartItems),
+      {
+        apiKeyRequired: true,
+      }
     );
 
     cartUserCheckout.addMethod(
       "POST",
-      new aws_apigateway.LambdaIntegration(placeOrder)
+      new aws_apigateway.LambdaIntegration(placeOrder),
+      {
+        apiKeyRequired: true,
+      }
     );
     api.root
       .addResource("order")
       .addResource("{id}")
-      .addMethod("GET", new aws_apigateway.LambdaIntegration(listOrders));
+      .addMethod("GET", new aws_apigateway.LambdaIntegration(listOrders), {
+        apiKeyRequired: true,
+      });
 
     new CfnOutput(this, "ApiURL", {
       value: `${api.url}products`,
+    });
+    new CfnOutput(this, "Api Key id", {
+      value: `${apiKey.keyId}`,
     });
   }
 }

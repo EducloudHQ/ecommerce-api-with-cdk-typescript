@@ -32,13 +32,13 @@ export const handler: Handler = async (
   const params = {
     TableName: tableName,
     Item: {
-      pk: `USER#${cartItem.userId}`,
-      sk: `PRODUCT#${cartItem.productId}`,
+      PK: `USER#${cartItem.userId}`,
+      SK: `PRODUCT#${cartItem.productId}`,
       productId: cartItem.productId,
       userId: cartItem.userId,
       quantity: cartItem.quantity,
       dateAdded: Date.now().toString(),
-      cartProdcutStatus: "PENDING",
+      cartProductStatus: "PENDING",
     },
   };
 

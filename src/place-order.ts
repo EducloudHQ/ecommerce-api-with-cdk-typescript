@@ -20,6 +20,19 @@ const region = process.env.Region;
 export const handler: Handler = async (
   event: APIGatewayProxyEvent
 ): Promise<APIGatewayProxyResult> => {
+  const id = event.pathParameters!.id;
+
+  if (id === undefined) {
+    logger.warn("Missing 'id' parameter in path while trying to place order", {
+      details: { eventPathParameters: event.pathParameters },
+    });
+
+    return {
+      statusCode: 400,
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ message: "Missing 'id' parameter in path" }),
+    };
+  }
   if (!event.body) {
     logger.warn("Empty request body provided while trying to place order");
 

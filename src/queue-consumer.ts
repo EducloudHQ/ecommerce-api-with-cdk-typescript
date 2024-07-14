@@ -5,9 +5,13 @@ import {
   EventType,
   processPartialResponse,
 } from "@aws-lambda-powertools/batch";
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from "aws-lambda";
-import { logger } from "./powertools/utilities";
 
+import { logger } from "./powertools/utilities";
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, UpdateCommand } from "@aws-sdk/lib-dynamodb";
+const client = new DynamoDBClient({});
+
+const ddbDocClient = DynamoDBDocumentClient.from(client);
 const processor = new BatchProcessor(EventType.SQS);
 
 const recordHandler = async (record: SQSRecord): Promise<void> => {
@@ -15,26 +19,14 @@ const recordHandler = async (record: SQSRecord): Promise<void> => {
   if (payload) {
     const item = JSON.parse(payload);
     logger.info("Processed item", { item });
-    /*
-     try {
-       const res = await ddbClient.update(params).promise();
-       response = {
-         statusCode: 200,
-         body: JSON.stringify({
-           message: "Cart product status updated",
-         }),
-       };
-       console.log("Cart product status updated");
-     } catch (err: unknown) {
-       console.log(err);
-       response = {
-         statusCode: 500,
-         body: JSON.stringify({
-           message: err instanceof Error ? err.message : "some error happened",
-         }),
-       };
-     }
-     */
+
+    try {
+      const command = new UpdateCommand(item);
+      await ddbDocClient.send(command);
+      logger.info("Cart product status updated");
+    } catch (error: any) {
+      logger.info("an error occured while updating cart items", error);
+    }
   }
 };
 export const handler: SQSHandler = async (event, context) =>

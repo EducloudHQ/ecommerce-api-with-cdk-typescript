@@ -12,57 +12,62 @@ import {
   processPartialResponse,
 } from "@aws-lambda-powertools/batch";
 
+const tableName = process.env.TABLE_NAME;
+
+const region = process.env.Region;
+
 const sqsClient = new SQSClient({ region: process.env.region });
 const processor = new BatchProcessor(EventType.DynamoDBStreams);
 
 const recordHandler = async (record: DynamoDBRecord): Promise<void> => {
   if (record.dynamodb && record.dynamodb.NewImage) {
+    logger.info("record", { record: record.dynamodb });
     logger.info("Processing record", { record: record.dynamodb.NewImage });
     const orderItems = record.dynamodb.NewImage.orderItems.L;
 
     logger.info("order items: ", JSON.stringify(orderItems));
-    const userId = record.dynamodb.NewImage.userId.S;
-    /*
-    if (orderItems) {
-      try {
-        for (let index = 0; index < orderItems.length; index++) {
-          const payload = JSON.parse(orderItems[index].S.productId);
-          logger.info("Processed item", { item: payload });
-          const element = orderItems[index].M.productId;
-          console.log(element);
-      
-      const params = {
-        TableName: tableName,
-        Key: {
-          PK: `USER#${userId}`,
-          SK: `PRODUCT#${element.S}`,
-        },
-        UpdateExpression: "set cartProductStatus = :status",
-        ExpressionAttributeValues: {
-          ":status": "ORDERED",
-        },
-        ReturnValues: "UPDATED_NEW",
-      };
-     
-          // console.log(params);
-          const params = {
-            QueueUrl: process.env.QUEUE_URL as string,
-            MessageBody: JSON.stringify(payload),
-          };
-          logger.info("sent sqs message body",params);
+    logger.info("order items: ", JSON.stringify(orderItems![0]));
 
-          const command = new SendMessageCommand(params);
+    try {
+      for (let index = 0; index < orderItems!.length; index++) {
+        const cartItem = orderItems![index].M;
+        logger.info("cart item: ", JSON.stringify(cartItem));
 
-          await sqsClient.send(command);
+        const productId = cartItem!.productId.S;
+        const userId = cartItem!.userId.S;
+        logger.info(`product id and user id ${productId!},${userId}`);
+        const payload = {
+          TableName: tableName,
+          Key: {
+            PK: `USER#${userId}`,
+            SK: `PRODUCT#${productId}`,
+          },
+          UpdateExpression: "set cartProductStatus = :status",
+          ExpressionAttributeValues: {
+            ":status": "ORDERED",
+          },
+          ReturnValues: "UPDATED_NEW",
+        };
 
-          
-        
-        }
-      } catch (err) {
-        console.log(err);
+        logger.info(
+          " process.env.QUEUE_URL",
+
+          process.env.QUEUE_URL as string
+        );
+
+        const params = {
+          QueueUrl: process.env.QUEUE_URL as string,
+          MessageBody: JSON.stringify(payload),
+        };
+
+        const command = new SendMessageCommand(params);
+
+        await sqsClient.send(command);
+        logger.info("sent sqs message body", params);
       }
+    } catch (err) {
+      console.log(err);
     }
-    */
   }
 };
 export const handler: DynamoDBStreamHandler = async (event, context) =>
