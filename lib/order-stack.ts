@@ -12,7 +12,7 @@ import {
 import { Construct } from "constructs";
 
 interface OrderStackProps extends StackProps {
-  ecommerceApiTable: aws_dynamodb.Table;
+  ecommerceTable: aws_dynamodb.Table;
   queue: aws_sqs.Queue;
   api: aws_apigateway.RestApi;
 }
@@ -21,7 +21,7 @@ export class OrderStack extends Stack {
   constructor(scope: Construct, id: string, props: OrderStackProps) {
     super(scope, id, props);
 
-    const { ecommerceApiTable, queue, api } = props;
+    const { ecommerceTable, queue, api } = props;
     const envVariables = {
       AWS_ACCOUNT_ID: Stack.of(this).account,
       POWERTOOLS_SERVICE_NAME: "serverless-ecommerce-api",
@@ -36,7 +36,7 @@ export class OrderStack extends Stack {
       runtime: aws_lambda.Runtime.NODEJS_20_X,
       memorySize: 256,
       environment: {
-        TABLE_NAME: ecommerceApiTable.tableName,
+        TABLE_NAME: ecommerceTable.tableName,
         QUEUE_NAME: queue.queueName,
         QUEUE_URL: queue.queueUrl,
         ...envVariables,
@@ -47,15 +47,6 @@ export class OrderStack extends Stack {
         minify: true,
       },
     };
-
-    const placeOrder = new aws_lambda_nodejs.NodejsFunction(
-      this,
-      "placeOrder",
-      {
-        entry: "./src/place-order.ts",
-        ...functionSettings,
-      }
-    );
 
     const listOrders = new aws_lambda_nodejs.NodejsFunction(
       this,
@@ -68,25 +59,11 @@ export class OrderStack extends Stack {
 
     //Grant all dynamodb permissions
 
-    ecommerceApiTable.grantReadData(listOrders);
+    ecommerceTable.grantReadData(listOrders);
 
-    ecommerceApiTable.grantReadWriteData(placeOrder);
-
-    // add orders endpoints to api gateway
-    const cart = api.root.addResource("cart");
-    const userCart = cart.addResource("{id}");
-    const cartUserCheckout = userCart.addResource("checkout");
-
-    cartUserCheckout.addMethod(
-      "POST",
-      new aws_apigateway.LambdaIntegration(placeOrder),
-      {
-        apiKeyRequired: true,
-      }
-    );
     api.root
-      .addResource("order")
-      .addResource("{id}")
+      .addResource("orders")
+      .addResource("{status}")
       .addMethod("GET", new aws_apigateway.LambdaIntegration(listOrders), {
         apiKeyRequired: true,
       });

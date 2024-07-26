@@ -12,7 +12,7 @@ const client = new DynamoDBClient({});
 
 const ddbDocClient = DynamoDBDocumentClient.from(client);
 
-const tableName = process.env.TABLE_NAME as string;
+const tableName = process.env.TABLE_NAME;
 
 export const handler: Handler = async (
   event: APIGatewayProxyEvent

@@ -17,17 +17,20 @@ import {
   DynamoEventSource,
   SqsEventSource,
 } from "aws-cdk-lib/aws-lambda-event-sources";
-export class EcomSharedStack extends Stack {
+
+export class EcomDdbSqsStack extends Stack {
   public readonly ecommerceApiTable: aws_dynamodb.Table;
   public readonly queue: aws_sqs.Queue;
-  public readonly api: aws_apigateway.RestApi;
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
     //Create DynamoDB Table
-    this.ecommerceApiTable = new aws_dynamodb.Table(this, "EcommerceAppTable", {
-      tableName: "ecommerce-products-api",
-      partitionKey: { name: "PK", type: aws_dynamodb.AttributeType.STRING },
+    this.ecommerceApiTable = new aws_dynamodb.Table(this, "EcommerceApiTable", {
+      tableName: `ecommerce-products-api-${Stack.of(this).region}`,
+      partitionKey: {
+        name: "PK",
+        type: aws_dynamodb.AttributeType.STRING,
+      },
       sortKey: { type: aws_dynamodb.AttributeType.STRING, name: "SK" },
       removalPolicy: RemovalPolicy.DESTROY,
       stream: aws_dynamodb.StreamViewType.NEW_IMAGE,
@@ -44,11 +47,12 @@ export class EcomSharedStack extends Stack {
         type: aws_dynamodb.AttributeType.STRING,
       },
     };
-    //create sqs queue
+
+    this.ecommerceApiTable.addGlobalSecondaryIndex(globalSecondaryIndexProps);
 
     this.queue = new aws_sqs.Queue(this, "ecommerce-api-queue", {
       visibilityTimeout: Duration.seconds(300),
-      queueName: "ecommerce-api-queue",
+      queueName: `ecommerce-api-queue-${Stack.of(this).region}`,
     });
 
     const envVariables = {
@@ -92,7 +96,7 @@ export class EcomSharedStack extends Stack {
       {
         entry: "./src/process-ddb-stream.ts",
         ...functionSettings,
-        role: processSqsMessageFunction.role,
+        // role: processSqsMessageFunction.role,
       }
     );
 
@@ -115,39 +119,10 @@ export class EcomSharedStack extends Stack {
       })
     );
 
-    this.ecommerceApiTable.addGlobalSecondaryIndex(globalSecondaryIndexProps);
     this.ecommerceApiTable.grantStreamRead(processDdbStreamFunction);
     this.ecommerceApiTable.grantReadWriteData(processDdbStreamFunction);
     this.queue.grantSendMessages(processDdbStreamFunction);
     this.queue.grantConsumeMessages(processSqsMessageFunction);
     this.ecommerceApiTable.grantWriteData(processSqsMessageFunction);
-
-    this.api = new aws_apigateway.RestApi(this, "ecom-api", {
-      restApiName: "ecommerce_api_cdk_rest",
-    });
-    const apiKey = this.api.addApiKey("ecommerce_api_key", {
-      apiKeyName: "ecommerce_api_key",
-    });
-    // Create a usage plan and associate the API Key
-    const plan = this.api.addUsagePlan("EcommerceApiKeyUsagePlan", {
-      name: "Easy",
-      throttle: {
-        rateLimit: 10,
-        burstLimit: 2,
-      },
-    });
-
-    plan.addApiKey(apiKey);
-
-    plan.addApiStage({
-      stage: this.api.deploymentStage,
-    });
-
-    new CfnOutput(this, "ApiGatewayURL", {
-      value: `${this.api.url}products`,
-    });
-    new CfnOutput(this, "Api Key id", {
-      value: `${apiKey.keyId}`,
-    });
   }
 }

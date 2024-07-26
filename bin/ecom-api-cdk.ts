@@ -1,22 +1,39 @@
 #!/usr/bin/env node
 import "source-map-support/register";
 import * as cdk from "aws-cdk-lib";
-import { EcomApiCdkStack } from "../lib/ecom-api-cdk-stack";
+
+import { ProductsStack } from "../lib/products-stack";
+import { OrderStack } from "../lib/order-stack";
+import { CartStack } from "../lib/cart-stack";
+
+import { EcomApiGatewayStack } from "../lib/ecom-api-gateway-stack";
+import { EcomDdbSqsStack } from "../lib/ecom-ddb-sqs-stack";
 
 const app = new cdk.App();
-new EcomApiCdkStack(app, "EcommerceRestAPICDKTypescript", {
-  /* If you don't specify 'env', this stack will be environment-agnostic.
-   * Account/Region-dependent features and context lookups will not work,
-   * but a single synthesized template can be deployed anywhere. */
 
-  /* Uncomment the next line to specialize this stack for the AWS Account
-   * and Region that are implied by the current CLI configuration. */
-  // env: { account: process.env.CDK_DEFAULT_ACCOUNT, region: process.env.CDK_DEFAULT_REGION },
+const ecomDdbStack = new EcomDdbSqsStack(app, "EcommerceDdbSQSStack");
+const ecomApiGatewayStack = new EcomApiGatewayStack(
+  app,
+  "EcommerceRestAPIGatewayStack",
+  {
+    ecommerceApiTable: ecomDdbStack.ecommerceApiTable,
+    queue: ecomDdbStack.queue,
+  }
+);
 
-  /* Uncomment the next line if you know exactly what Account and Region you
-   * want to deploy the stack to. */
-  // env: { account: '123456789012', region: 'us-east-1' },
+new ProductsStack(app, "ProductsStack", {
+  api: ecomApiGatewayStack.api,
+  ecommerceApiTable: ecomDdbStack.ecommerceApiTable,
+  queue: ecomDdbStack.queue,
+});
 
-  env: { account: "132260253285", region: "us-east-2" },
-  /* For more information, see https://docs.aws.amazon.com/cdk/latest/guide/environments.html */
+new OrderStack(app, "OrderStack", {
+  api: ecomApiGatewayStack.api,
+  ecommerceTable: ecomDdbStack.ecommerceApiTable,
+  queue: ecomDdbStack.queue,
+});
+new CartStack(app, "CartStack", {
+  api: ecomApiGatewayStack.api,
+  ecommerceApiTable: ecomDdbStack.ecommerceApiTable,
+  queue: ecomDdbStack.queue,
 });

@@ -3,7 +3,7 @@ import {
   Handler,
   APIGatewayProxyResult,
 } from "aws-lambda";
-import { logger, metrics, tracer } from "../src/powertools/utilities";
+import { logger, metrics, tracer } from "./powertools/utilities";
 import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
 import { DynamoDBDocumentClient, PutCommand } from "@aws-sdk/lib-dynamodb";
 import { v4 as uuidv4 } from "uuid";
@@ -34,7 +34,7 @@ export const handler: Handler = async (
     };
   }
   if (!event.body) {
-    logger.warn("Empty request body provided while trying to place order");
+    logger.warn("Empty request body provided while trying to checkout");
 
     return {
       statusCode: 400,
@@ -42,9 +42,9 @@ export const handler: Handler = async (
       body: JSON.stringify({ message: "Empty request body" }),
     };
   }
-  metrics.addMetric("PlaceOrderInvocations", MetricUnit.Count, 1);
+  metrics.addMetric("CheckoutInvocations", MetricUnit.Count, 1);
   // Order Status is either ORDERED/CANCELLED/COMPLETED
-  // When you place the order, the status is set to ORDERED
+  // When you checkout, the status is set to ORDERED
   // when  you cancel the order, the status is set to CANCELLED
   // when you complete the order, the status is set to COMPLETED
 

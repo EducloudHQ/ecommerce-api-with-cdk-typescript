@@ -4,24 +4,26 @@ import {
   aws_apigateway,
   aws_lambda_nodejs,
   aws_lambda,
-  aws_sqs,
-  aws_dynamodb,
   aws_logs,
 } from "aws-cdk-lib";
+
+import { Queue } from "aws-cdk-lib/aws-sqs";
+import { Table } from "aws-cdk-lib/aws-dynamodb";
+import { RestApi } from "aws-cdk-lib/aws-apigateway";
 
 import { Construct } from "constructs";
 
 interface ProductsStackProps extends StackProps {
-  ecommerceApiTable: aws_dynamodb.Table;
-  queue: aws_sqs.Queue;
-  api: aws_apigateway.RestApi;
+  ecommerceApiTable: Table;
+  queue: Queue;
+  api: RestApi;
 }
 
 export class ProductsStack extends Stack {
   constructor(scope: Construct, id: string, props: ProductsStackProps) {
     super(scope, id, props);
 
-    const { ecommerceApiTable, queue, api } = props;
+    const { api, ecommerceApiTable, queue } = props;
     const envVariables = {
       AWS_ACCOUNT_ID: Stack.of(this).account,
       POWERTOOLS_SERVICE_NAME: "serverless-ecommerce-api",

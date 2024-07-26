@@ -23,7 +23,7 @@ export class CartStack extends Stack {
 
     const { ecommerceApiTable, queue, api } = props;
     const envVariables = {
-      AWS_ACCOUNT_ID: Stack.of(this).account,
+      // AWS_ACCOUNT_ID: Stack.of(this).account,
       POWERTOOLS_SERVICE_NAME: "serverless-ecommerce-api",
       POWERTOOLS_LOGGER_LOG_LEVEL: "WARN",
       POWERTOOLS_LOGGER_SAMPLE_RATE: "0.01",
@@ -62,6 +62,15 @@ export class CartStack extends Stack {
       }
     );
 
+    const checkoutFunction = new aws_lambda_nodejs.NodejsFunction(
+      this,
+      "checkoutFunction",
+      {
+        entry: "./src/checkout.ts",
+        ...functionSettings,
+      }
+    );
+
     //Grant all dynamodb permissions
 
     ecommerceApiTable.grantReadData(listCartItems);
@@ -70,8 +79,20 @@ export class CartStack extends Stack {
 
     // add cart endpoints to api gateway
 
+    ecommerceApiTable.grantReadWriteData(checkoutFunction);
+
+    // add orders endpoints to api gateway
     const cart = api.root.addResource("cart");
     const userCart = cart.addResource("{id}");
+    const cartUserCheckout = userCart.addResource("checkout");
+
+    cartUserCheckout.addMethod(
+      "POST",
+      new aws_apigateway.LambdaIntegration(checkoutFunction),
+      {
+        apiKeyRequired: true,
+      }
+    );
 
     cart.addMethod("POST", new aws_apigateway.LambdaIntegration(addToCart), {
       apiKeyRequired: true,
