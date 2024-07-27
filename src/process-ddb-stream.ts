@@ -23,10 +23,7 @@ const recordHandler = async (record: DynamoDBRecord): Promise<void> => {
   if (record.dynamodb && record.dynamodb.NewImage) {
     logger.info("record", { record: record.dynamodb });
     logger.info("Processing record", { record: record.dynamodb.NewImage });
-    if (record.dynamodb.NewImage.orderItems == null) {
-      logger.info("no order items found");
-      return;
-    }
+
     const orderItems = record.dynamodb.NewImage.orderItems.L;
 
     logger.info("order items: ", JSON.stringify(orderItems));

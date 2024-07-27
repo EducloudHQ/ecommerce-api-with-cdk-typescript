@@ -17,6 +17,7 @@ import {
   DynamoEventSource,
   SqsEventSource,
 } from "aws-cdk-lib/aws-lambda-event-sources";
+import { eventNames } from "process";
 
 export class EcomDdbSqsStack extends Stack {
   public readonly ecommerceApiTable: aws_dynamodb.Table;
@@ -115,6 +116,15 @@ export class EcomDdbSqsStack extends Stack {
       new DynamoEventSource(this.ecommerceApiTable, {
         startingPosition: aws_lambda.StartingPosition.LATEST,
         reportBatchItemFailures: true,
+
+        filters: [
+          aws_lambda.FilterCriteria.filter({
+            eventName: aws_lambda.FilterRule.isEqual("INSERT"),
+
+            dynamodb: { NewImage: { order_status: { S: ["ORDERED"] } } },
+          }),
+        ],
+
         batchSize: 5,
       })
     );
