@@ -20,5 +20,89 @@ interface CartStackProps extends StackProps {
 export class CartStack extends Stack {
   constructor(scope: Construct, id: string, props: CartStackProps) {
     super(scope, id, props);
+
+    const { ecommerceApiTable, queue, api } = props;
+    const envVariables = {
+      // AWS_ACCOUNT_ID: Stack.of(this).account,
+      POWERTOOLS_SERVICE_NAME: "serverless-ecommerce-api",
+      POWERTOOLS_LOGGER_LOG_LEVEL: "WARN",
+      POWERTOOLS_LOGGER_SAMPLE_RATE: "0.01",
+      POWERTOOLS_LOGGER_LOG_EVENT: "true",
+      POWERTOOLS_METRICS_NAMESPACE: "EducloudWorkshops",
+    };
+
+    const functionSettings = {
+      handler: "handler",
+      runtime: aws_lambda.Runtime.NODEJS_20_X,
+      memorySize: 256,
+      environment: {
+        TABLE_NAME: ecommerceApiTable.tableName,
+        QUEUE_NAME: queue.queueName,
+        QUEUE_URL: queue.queueUrl,
+        ...envVariables,
+      },
+      logRetention: aws_logs.RetentionDays.ONE_WEEK,
+      tracing: aws_lambda.Tracing.ACTIVE,
+      bundling: {
+        minify: true,
+      },
+    };
+
+    const addToCart = new aws_lambda_nodejs.NodejsFunction(this, "addToCart", {
+      entry: "./src/add-to-cart.ts",
+      ...functionSettings,
+    });
+
+    const listCartItems = new aws_lambda_nodejs.NodejsFunction(
+      this,
+      "listCartItems",
+      {
+        entry: "./src/list-cart-items.ts",
+        ...functionSettings,
+      }
+    );
+
+    const checkoutFunction = new aws_lambda_nodejs.NodejsFunction(
+      this,
+      "checkoutFunction",
+      {
+        entry: "./src/checkout.ts",
+        ...functionSettings,
+      }
+    );
+
+    //Grant all dynamodb permissions
+
+    ecommerceApiTable.grantReadData(listCartItems);
+
+    ecommerceApiTable.grantWriteData(addToCart);
+
+    // add cart endpoints to api gateway
+
+    ecommerceApiTable.grantWriteData(checkoutFunction);
+
+    // add cart endpoints to api gateway
+    const cart = api.root.addResource("cart");
+    const userCart = cart.addResource("{id}");
+    const cartUserCheckout = userCart.addResource("checkout");
+
+    cartUserCheckout.addMethod(
+      "POST",
+      new aws_apigateway.LambdaIntegration(checkoutFunction),
+      {
+        apiKeyRequired: true,
+      }
+    );
+
+    cart.addMethod("POST", new aws_apigateway.LambdaIntegration(addToCart), {
+      apiKeyRequired: true,
+    });
+    userCart.addMethod(
+      "GET",
+      new aws_apigateway.LambdaIntegration(listCartItems),
+      {
+        apiKeyRequired: true,
+      }
+    );
   }
 }

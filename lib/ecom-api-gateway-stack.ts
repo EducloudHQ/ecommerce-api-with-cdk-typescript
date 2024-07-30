@@ -17,8 +17,6 @@ export class EcomApiGatewayStack extends Stack {
   constructor(scope: Construct, id: string, props: EcomApiGatewayStackProps) {
     super(scope, id, props);
 
-    //create sqs queue
-
     this.api = new aws_apigateway.RestApi(this, "ecom-api", {
       restApiName: `ecommerce_api_cdk_rest-${Stack.of(this).region}`,
     });
